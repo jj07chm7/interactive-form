@@ -47,7 +47,7 @@ const jsLibsName = 'js-libs';
 let totalCost = 0;
 
 // Create total cost section
-const showTotal = document.createElement("p");
+const showTotal = document.createElement("h4");
 showTotal.innerHTML = "Total Cost: $";
 activities.appendChild(showTotal);
 const totalAmount = document.createElement("span");
@@ -99,3 +99,57 @@ activities.addEventListener('change', (event) => {
     }
   }
 });
+
+// Select payment section
+const payment = document.getElementById('payment');
+// Set default option to credit card
+payment.value = "credit card";
+// Display but prevent user from selecting "Select Payment Method"
+payment.firstChild.nextSibling.setAttribute("disabled", "true");
+
+// Select credit card option
+const creditOption = document.getElementById("credit-card");
+// Select paypal and bitcoin options
+const otherPayOptions = document.querySelectorAll("p");
+const paypalOption = otherPayOptions[0];
+const bitcoinOption = otherPayOptions[1];
+// Hide paypal and bitcoin by default
+paypalOption.style.display = 'none';
+bitcoinOption.style.display = 'none';
+
+// Toggle between options and hide other other two other options
+// when one is selected
+payment.addEventListener("change", (event) => {
+  if (event.target.value === 'paypal') {
+    paypalOption.style.display = 'block';
+    creditOption.style.display = 'none';
+    bitcoinOption.style.display = 'none';
+  } else if (event.target.value === 'bitcoin') {
+    paypalOption.style.display = 'none';
+    creditOption.style.display = 'none';
+    bitcoinOption.style.display = 'block';
+  } else if (event.target.value === 'credit card') {
+    paypalOption.style.display = 'none';
+    creditOption.style.display = 'block';
+    bitcoinOption.style.display = 'none';
+  }
+});
+
+// If any of the following validation errors exist, prevent the user from submitting the form:
+// Name field can't be blank.
+// Email field must be a validly formatted e-mail address (you don't have to check that it's a real e-mail address, just that it's formatted like one: dave@teamtreehouse.com for example.
+// User must select at least one checkbox under the "Register for Activities" section of the form.
+// If the selected payment option is "Credit Card," make sure the user has supplied a Credit Card number, a Zip Code, and a 3 number CVV value before the form can be submitted.
+// Credit Card field should only accept a number between 13 and 16 digits.
+// The Zip Code field should accept a 5-digit number.
+// The CVV should only accept a number that is exactly 3 digits long.
+// NOTE: Make sure your validation is only validating Credit Card info if Credit Card is the selected payment method.
+
+const form = document.querySelector("form");
+form.addEventListener("submit", (event) => {
+  if (nameInput.value === '') {
+    //e.preventDefault();
+    nameInput.style.border = "thick solid #0000FF";
+    event.preventDefault();
+  }
+})
