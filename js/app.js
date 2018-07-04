@@ -22,6 +22,8 @@ let loveJs = '';
 for (let i = 0; i < tshirtColors.length; i++) {
   i < 3 ? jsPuns += tshirtColors[i].outerHTML : loveJs += tshirtColors[i].outerHTML;
 }
+// Hide tshirt colors
+tshirtColors.style.display = 'none';
 // Get the select element for the color options
 const designSelection = document.getElementById('design');
 // Disabled choosing "Select Theme"
@@ -30,8 +32,12 @@ designSelection.firstChild.nextSibling.setAttribute("disabled", "true");
 designSelection.addEventListener('change', (event) => {
   tshirtColors.innerHTML = '';
   if (event.target.value === 'js puns') {
+    // Show js puns options
+    tshirtColors.style.display = 'block';
     tshirtColors.innerHTML = jsPuns;
   } else  if (event.target.value === 'heart js') {
+    // Show heart js options
+    tshirtColors.style.display = 'block';
     tshirtColors.innerHTML = loveJs;
   }
 });
@@ -145,14 +151,17 @@ const cvv = document.getElementById("cvv");
 const totalCheckboxes = checkboxes.length;
 // Event listener for form
 form.addEventListener("submit", (event) => {
+  errorPresent = false;
   // Must have a name
   if (nameInput.value === '') {
     nameInput.style.border = "0.5px solid #FF0000";
+    errorPresent = true;
     event.preventDefault();
   }
   // Need an email. Checking for '@' symbol
   if (email.value.indexOf('@') == -1) {
     email.style.border = "0.5px solid #FF0000";
+    errorPresent = true;
     event.preventDefault();
   }
   // Checkbox validation
@@ -170,23 +179,27 @@ form.addEventListener("submit", (event) => {
     errorMessage.style.color = 'red';
     errorMessage.innerHTML = "You must select one activity.";
     showTotal.appendChild(errorMessage);
+    errorPresent = true;
     event.preventDefault();
   }
   // Credit card validation
   if (payment.value === 'credit card') {
     // Credit card needs a value and must be at least 13 numbers and less than 16
-    if (!ccNumber.value || ccNumber.value.length < 13 || ccNumber.value.length > 16) {
+    if (ccNumber.value === '' || ccNumber.value.length < 13 || ccNumber.value.length > 16) {
       ccNumber.style.border = "0.5px solid #FF0000";
+      errorPresent = true;
       event.preventDefault();
     }
-    // Zip code needs a a value and must be 5 characters
-    if (!zipCode.value || zipCode.value.length !== 5) {
+    // Zip code needs a a value and must be 5 numbers
+    if (zipCode.value === '' || zipCode.value.length !== 5 || isNaN(parseInt(Number.isInteger(zipCode.value)))) {
       zipCode.style.border = "0.5px solid #FF0000";
+      errorPresent = true;
       event.preventDefault();
     }
-    // CVV needs a value and be 3 characters
-    if (!cvv.value || cvv.value.length !== 3) {
+    // CVV needs a value and be 3 numbers
+    if (cvv.value === '' || cvv.value.length !== 3 || isNaN(parseInt(Number.isInteger(cvv.value)))) {
       cvv.style.border = "0.5px solid #FF0000";
+      errorPresent = true;
       event.preventDefault();
     }
   }
