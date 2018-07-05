@@ -2,16 +2,17 @@
 const nameInput = document.getElementById('name');
 nameInput.focus();
 
-// When 'Other' is selected in job role, create new input field
+// Select other input box and hide it by default
+// when JavaScript is enabled
+const other = document.getElementById("other-title");
+other.style.display = 'none';
+// When 'Other' is selected in job role, show the input field
 const jobTitle = document.getElementById('title');
 jobTitle.addEventListener('change', (event) => {
   if (event.target.value === 'other') {
-    const otherInput = document.createElement("INPUT");
-    otherInput.setAttribute("type", "text");
-    otherInput.setAttribute("id", "other-title");
-    otherInput.setAttribute("placeholder", "Your Job Role");
-    const fieldset = document.querySelector("fieldset");
-    fieldset.appendChild(otherInput);
+    other.style.display = 'block';
+  } else {
+    other.style.display = 'none';
   }
 });
 
@@ -141,6 +142,7 @@ payment.addEventListener("change", (event) => {
 const form = document.querySelector("form");
 // Override browser email validation
 form.setAttribute("novalidate", "true");
+// form.setAttribute("id", "formElement");
 // Select elements that need validation
 const email = document.getElementById("mail");
 const checkboxes = document.querySelectorAll('input[type=checkbox]');
@@ -149,20 +151,45 @@ const zipCode = document.getElementById("zip");
 const cvv = document.getElementById("cvv");
 // Get total number of checkboxes
 const totalCheckboxes = checkboxes.length;
+
+// Function to check for numbers in name value
+function nameCheck(name) {
+  let numPresent = false;
+  for (let i = 0; i < name.length; i++) {
+    if (!isNaN(name[i])) {
+      numPresent = true;
+      return numPresent;
+    }
+  }
+}
+
+// Function to check for non-numbers in zip code or cvv
+function numCheck(num) {
+  let charPresent = false;
+  for (let i = 0; i < num.length; i++) {
+    if (isNaN(num[i])) {
+      charPresent = true;
+      return charPresent;
+    }
+  }
+}
+
+let errorPresent = false;
 // Event listener for form
 form.addEventListener("submit", (event) => {
-  errorPresent = false;
   // Must have a name
-  if (nameInput.value === '') {
+  if (nameInput.value === '' || nameCheck(nameInput.value)) {
+    event.preventDefault();
     nameInput.style.border = "0.5px solid #FF0000";
     errorPresent = true;
-    event.preventDefault();
+    //disableElement("button");
   }
-  // Need an email. Checking for '@' symbol
-  if (email.value.indexOf('@') == -1) {
+  // Need an email. Checking for '@' symbol and .com at the end
+  if (email.value === '' || email.value.substring(email.value.length - 4) !== ".com" || email.value.indexOf('@') === -1) {
+    event.preventDefault();
     email.style.border = "0.5px solid #FF0000";
     errorPresent = true;
-    event.preventDefault();
+    //disableElement("button");
   }
   // Checkbox validation
   let checked = 0;
@@ -176,31 +203,39 @@ form.addEventListener("submit", (event) => {
   if (checked === 0) {
     // Insert h4 element with error message
     const errorMessage = document.createElement("h4");
+    event.preventDefault();
     errorMessage.style.color = 'red';
     errorMessage.innerHTML = "You must select one activity.";
     showTotal.appendChild(errorMessage);
     errorPresent = true;
-    event.preventDefault();
   }
   // Credit card validation
   if (payment.value === 'credit card') {
     // Credit card needs a value and must be at least 13 numbers and less than 16
     if (ccNumber.value === '' || ccNumber.value.length < 13 || ccNumber.value.length > 16) {
+      event.preventDefault();
       ccNumber.style.border = "0.5px solid #FF0000";
       errorPresent = true;
-      event.preventDefault();
     }
     // Zip code needs a a value and must be 5 numbers
-    if (zipCode.value === '' || zipCode.value.length !== 5 || isNaN(parseInt(Number.isInteger(zipCode.value)))) {
+    if (zipCode.value === '' || zipCode.value.length !== 5 || numCheck(zipCode.value)) {
+      event.preventDefault();
       zipCode.style.border = "0.5px solid #FF0000";
       errorPresent = true;
-      event.preventDefault();
     }
     // CVV needs a value and be 3 numbers
-    if (cvv.value === '' || cvv.value.length !== 3 || isNaN(parseInt(Number.isInteger(cvv.value)))) {
+    if (cvv.value === '' || cvv.value.length !== 3 || numCheck(cvv.value)) {
+      event.preventDefault();
       cvv.style.border = "0.5px solid #FF0000";
       errorPresent = true;
-      event.preventDefault();
     }
   }
 });
+
+// Prevent user from being able to click button to submit form with errors
+const button = document.querySelector("button");
+button.addEventListener("click", function(event) {
+  if (errorPresent) {
+    event.preventDefault();
+  }
+})
