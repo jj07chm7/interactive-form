@@ -174,11 +174,25 @@ function numCheck(num) {
   }
 }
 
+// Name validation using regex
+// Used the following post on stackoverflow to get regex:
+// https://stackoverflow.com/a/14088769
+// https://stackoverflow.com/a/42021703
+function validateName(name) {
+  const regex = /^([a-zA-Z]+\s)*[a-zA-Z]+$/;
+  if (regex.test(name)) {
+    return true;
+  }
+  else {
+    return false;
+  }
+}
+
 let errorPresent = false;
 // Event listener for form
 form.addEventListener("submit", (event) => {
-  // Must have a name
-  if (nameInput.value === '' || nameCheck(nameInput.value)) {
+  // Must have a name and name can't contain non-letters
+  if (nameInput.value === '' || !validateName(nameInput.value)) {
     event.preventDefault();
     nameInput.style.border = "0.5px solid #FF0000";
     errorPresent = true;
