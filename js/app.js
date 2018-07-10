@@ -1,4 +1,24 @@
 // When first loading page, focus on name input field
+// $(document).ready(function() {
+//   $('#name').focus();
+//
+//   $('#name').change(function(event) {
+//     console.log(event.target.value);
+//   });
+//
+//   $('form').submit(function(event) {
+//     var submit = true;
+//     if ($('#name').val() === '') {
+//       $('#name').after("<p id='stop'>STOP</p>");
+//       submit = false;
+//     }
+//     if (submit === false) {
+//       event.preventDefault();
+//     }
+//   });
+// });
+
+//When first loading page, focus on name input field
 const nameInput = document.getElementById('name');
 nameInput.focus();
 
@@ -142,15 +162,28 @@ payment.addEventListener("change", (event) => {
 const form = document.querySelector("form");
 // Override browser email validation
 form.setAttribute("novalidate", "true");
-// form.setAttribute("id", "formElement");
 // Select elements that need validation
 const email = document.getElementById("mail");
+// designSelection
 const checkboxes = document.querySelectorAll('input[type=checkbox]');
 const ccNumber = document.getElementById("cc-num");
 const zipCode = document.getElementById("zip");
 const cvv = document.getElementById("cvv");
 // Get total number of checkboxes
 const totalCheckboxes = checkboxes.length;
+
+// Name validation using regex, used the following post on stackoverflow to get regex:
+// https://stackoverflow.com/a/14088769
+// https://stackoverflow.com/a/42021703
+function validateName(name) {
+  const regex = /^([a-zA-Z]+\s)*[a-zA-Z]+$/;
+  if (regex.test(name)) {
+    return true;
+  }
+  else {
+    return false;
+  }
+}
 
 // Function to check for numbers in name value
 function nameCheck(name) {
@@ -174,82 +207,73 @@ function numCheck(num) {
   }
 }
 
-// Name validation using regex
-// Used the following post on stackoverflow to get regex:
-// https://stackoverflow.com/a/14088769
-// https://stackoverflow.com/a/42021703
-function validateName(name) {
-  const regex = /^([a-zA-Z]+\s)*[a-zA-Z]+$/;
-  if (regex.test(name)) {
-    return true;
-  }
-  else {
-    return false;
-  }
-}
-
-let errorPresent = false;
-// Event listener for form
-form.addEventListener("submit", (event) => {
-  // Must have a name and name can't contain non-letters
+form.addEventListener("submit", function(event) {
+  let submit = false;
   if (nameInput.value === '' || !validateName(nameInput.value)) {
-    event.preventDefault();
+    submit = false;
     nameInput.style.border = "0.5px solid #FF0000";
-    errorPresent = true;
-    //disableElement("button");
+  } else {
+    submit = true;
+    nameInput.style.border = "";
   }
-  // Need an email. Checking for '@' symbol and .com at the end
   if (email.value === '' || email.value.substring(email.value.length - 4) !== ".com" || email.value.indexOf('@') === -1) {
-    event.preventDefault();
+    submit = false;
     email.style.border = "0.5px solid #FF0000";
-    errorPresent = true;
-    //disableElement("button");
+  } else {
+    submit = true;
+    email.style.border = "";
   }
-  // Checkbox validation
-  let checked = 0;
-  // Get count of checked boxes
-  for (let i = 0; i < checkboxes.length; i++) {
-    if (checkboxes[i].checked === true) {
-      checked += 1;
-    }
+  if (designSelection.value === 'Select Theme') {
+    submit = false;
+    const tshirtError = document.getElementById("tshirt-error");
+    tshirtError.style.display = "block"
+    tshirtError.style.color = 'red';
+    tshirtError.innerHTML = "Select a theme!";
+  } else {
+    submit = true;
+    const tshirtError = document.getElementById("tshirt-error");
+    tshirtError.style.display = "none";
   }
-  // If no boxes checked, show error
-  if (checked === 0) {
-    // Insert h4 element with error message
-    const errorMessage = document.createElement("h4");
-    event.preventDefault();
-    errorMessage.style.color = 'red';
-    errorMessage.innerHTML = "You must select one activity.";
-    showTotal.appendChild(errorMessage);
-    errorPresent = true;
+    const checked = $('input:checkbox:checked').length;
+    if (!checked) {
+      submit = false;
+      const activitiesError = document.getElementById("activities-error");
+      activitiesError.style.display = "block"
+      activitiesError.style.color = 'red';
+      activitiesError.innerHTML = "Select an activity!";
+    } else {
+      submit = true;
+      const activitiesError = document.getElementById("activities-error");
+      activitiesError.style.display = "none";
+    }
+      // Credit card validation
+    if (payment.value === 'credit card') {
+      // Credit card needs a value and must be at least 13 numbers and less than 16
+      if (ccNumber.value === '' || ccNumber.value.length < 13 || ccNumber.value.length > 16 || numCheck(ccNumber.value)) {
+        submit = false;
+        ccNumber.style.border = "0.5px solid #FF0000";
+      } else {
+        submit = true;
+        ccNumber.style.border = "";
+      }
+      // Zip code needs a a value and must be 5 numbers
+      if (zipCode.value === '' || zipCode.value.length !== 5 || numCheck(zipCode.value)) {
+        submit = false;
+        zipCode.style.border = "0.5px solid #FF0000";
+      } else {
+        submit = true;
+        zipCode.style.border = "";
+      }
+      // CVV needs a value and be 3 numbers
+      if (cvv.value === '' || cvv.value.length !== 3 || numCheck(cvv.value)) {
+        submit = false;
+        cvv.style.border = "0.5px solid #FF0000";
+      } else {
+        submit = true;
+        cvv.style.border = "";
+      }
   }
-  // Credit card validation
-  if (payment.value === 'credit card') {
-    // Credit card needs a value and must be at least 13 numbers and less than 16
-    if (ccNumber.value === '' || ccNumber.value.length < 13 || ccNumber.value.length > 16) {
-      event.preventDefault();
-      ccNumber.style.border = "0.5px solid #FF0000";
-      errorPresent = true;
-    }
-    // Zip code needs a a value and must be 5 numbers
-    if (zipCode.value === '' || zipCode.value.length !== 5 || numCheck(zipCode.value)) {
-      event.preventDefault();
-      zipCode.style.border = "0.5px solid #FF0000";
-      errorPresent = true;
-    }
-    // CVV needs a value and be 3 numbers
-    if (cvv.value === '' || cvv.value.length !== 3 || numCheck(cvv.value)) {
-      event.preventDefault();
-      cvv.style.border = "0.5px solid #FF0000";
-      errorPresent = true;
-    }
-  }
-});
-
-// Prevent user from being able to click button to submit form with errors
-const button = document.querySelector("button");
-button.addEventListener("click", function(event) {
-  if (errorPresent) {
+  if (submit === false) {
     event.preventDefault();
   }
 })
