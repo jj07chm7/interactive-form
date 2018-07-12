@@ -1,23 +1,3 @@
-// When first loading page, focus on name input field
-// $(document).ready(function() {
-//   $('#name').focus();
-//
-//   $('#name').change(function(event) {
-//     console.log(event.target.value);
-//   });
-//
-//   $('form').submit(function(event) {
-//     var submit = true;
-//     if ($('#name').val() === '') {
-//       $('#name').after("<p id='stop'>STOP</p>");
-//       submit = false;
-//     }
-//     if (submit === false) {
-//       event.preventDefault();
-//     }
-//   });
-// });
-
 //When first loading page, focus on name input field
 const nameInput = document.getElementById('name');
 nameInput.focus();
@@ -64,7 +44,7 @@ designSelection.addEventListener('change', (event) => {
 });
 
 // Select activities class
-const activities = document.querySelector(".activities");
+let activities = document.querySelector(".activities");
 // Get names of activies that overlap
 const jsFrameworksName = 'js-frameworks';
 const expressName = 'express';
@@ -130,8 +110,7 @@ activities.addEventListener('change', (event) => {
 const payment = document.getElementById('payment');
 // Set default option to credit card
 payment.value = "credit card";
-// Display but prevent user from selecting "Select Payment Method"
-payment.firstChild.nextSibling.setAttribute("disabled", "true");
+
 // Select credit card option
 const creditOption = document.getElementById("credit-card");
 // Select paypal and bitcoin options
@@ -158,19 +137,17 @@ payment.addEventListener("change", (event) => {
     bitcoinOption.style.display = 'none';
   }
 });
+
 // Select the form
 const form = document.querySelector("form");
 // Override browser email validation
 form.setAttribute("novalidate", "true");
 // Select elements that need validation
 const email = document.getElementById("mail");
-// designSelection
 const checkboxes = document.querySelectorAll('input[type=checkbox]');
 const ccNumber = document.getElementById("cc-num");
 const zipCode = document.getElementById("zip");
 const cvv = document.getElementById("cvv");
-// Get total number of checkboxes
-const totalCheckboxes = checkboxes.length;
 
 // Name validation using regex, used the following post on stackoverflow to get regex:
 // https://stackoverflow.com/a/14088769
@@ -185,18 +162,7 @@ function validateName(name) {
   }
 }
 
-// Function to check for numbers in name value
-function nameCheck(name) {
-  let numPresent = false;
-  for (let i = 0; i < name.length; i++) {
-    if (!isNaN(name[i])) {
-      numPresent = true;
-      return numPresent;
-    }
-  }
-}
-
-// Function to check for non-numbers in zip code or cvv
+// Function to check for non-numbers in cc, zip code, or cvv
 function numCheck(num) {
   let charPresent = false;
   for (let i = 0; i < num.length; i++) {
@@ -207,73 +173,98 @@ function numCheck(num) {
   }
 }
 
+// Form event listener when submitting
 form.addEventListener("submit", function(event) {
-  let submit = false;
+  // Object to track validation errors
+  let submit = {};
+  // Validate name
   if (nameInput.value === '' || !validateName(nameInput.value)) {
-    submit = false;
+    submit["name"] = false;
     nameInput.style.border = "0.5px solid #FF0000";
   } else {
-    submit = true;
+    submit["name"] = true;
     nameInput.style.border = "";
   }
+  // Validate email
   if (email.value === '' || email.value.substring(email.value.length - 4) !== ".com" || email.value.indexOf('@') === -1) {
-    submit = false;
+    submit["email"] = false;
     email.style.border = "0.5px solid #FF0000";
   } else {
-    submit = true;
+    submit["email"] = true;
     email.style.border = "";
   }
+  // Validate job role section
+  if (jobTitle.value === 'other' && other.value === '') {
+    submit["other"] = false;
+    other.style.border = "0.5px solid #FF0000";
+  } else {
+    submit["other"] = true;
+    other.style.border = "";
+  }
+  // Validate t-shirt info
   if (designSelection.value === 'Select Theme') {
-    submit = false;
+    submit["design"] = false;
+    // Show error if validation fails
     const tshirtError = document.getElementById("tshirt-error");
     tshirtError.style.display = "block"
     tshirtError.style.color = 'red';
     tshirtError.innerHTML = "Select a theme!";
   } else {
-    submit = true;
+    submit["design"] = true;
     const tshirtError = document.getElementById("tshirt-error");
     tshirtError.style.display = "none";
   }
-    const checked = $('input:checkbox:checked').length;
-    if (!checked) {
-      submit = false;
-      const activitiesError = document.getElementById("activities-error");
-      activitiesError.style.display = "block"
-      activitiesError.style.color = 'red';
-      activitiesError.innerHTML = "Select an activity!";
+    // Credit card validation if selected
+  if (payment.value === 'credit card' && payment.value !== 'bitcoin' || payment.value !== 'paypal') {
+    // Credit card needs a value and must be at least 13 numbers and less than 16
+    if (ccNumber.value === '' || ccNumber.value.length < 13 || ccNumber.value.length > 16 || numCheck(ccNumber.value)) {
+      submit["cc"] = false;
+      ccNumber.style.border = "0.5px solid #FF0000";
     } else {
-      submit = true;
-      const activitiesError = document.getElementById("activities-error");
-      activitiesError.style.display = "none";
+      submit["cc"] = true;
+      ccNumber.style.border = "";
     }
-      // Credit card validation
-    if (payment.value === 'credit card') {
-      // Credit card needs a value and must be at least 13 numbers and less than 16
-      if (ccNumber.value === '' || ccNumber.value.length < 13 || ccNumber.value.length > 16 || numCheck(ccNumber.value)) {
-        submit = false;
-        ccNumber.style.border = "0.5px solid #FF0000";
-      } else {
-        submit = true;
-        ccNumber.style.border = "";
-      }
-      // Zip code needs a a value and must be 5 numbers
-      if (zipCode.value === '' || zipCode.value.length !== 5 || numCheck(zipCode.value)) {
-        submit = false;
-        zipCode.style.border = "0.5px solid #FF0000";
-      } else {
-        submit = true;
-        zipCode.style.border = "";
-      }
-      // CVV needs a value and be 3 numbers
-      if (cvv.value === '' || cvv.value.length !== 3 || numCheck(cvv.value)) {
-        submit = false;
-        cvv.style.border = "0.5px solid #FF0000";
-      } else {
-        submit = true;
-        cvv.style.border = "";
-      }
+    // Zip code needs a a value and must be 5 numbers
+    if (zipCode.value === '' || zipCode.value.length !== 5 || numCheck(zipCode.value)) {
+      submit["zip"] = false;
+      zipCode.style.border = "0.5px solid #FF0000";
+    } else {
+      submit["zip"] = true;
+      zipCode.style.border = "";
+    }
+    // CVV needs a value and be 3 numbers
+    if (cvv.value === '' || cvv.value.length !== 3 || numCheck(cvv.value)) {
+      submit["cvv"] = false;
+      cvv.style.border = "0.5px solid #FF0000";
+    } else {
+      submit["cvv"] = true;
+      cvv.style.border = "";
+    }
   }
-  if (submit === false) {
-    event.preventDefault();
+  // Used this resource to validate checkboxes
+  // https://stackoverflow.com/a/14801145
+  let checkboxesForm = document.querySelectorAll('input[type=checkbox]');
+  let empty = [].filter.call(checkboxesForm, function( element ) {
+     return !element.checked
+  });
+  // Validate checkboxes
+  if (checkboxesForm.length == empty.length) {
+    submit["act"] = false;
+    // Show error if validation fails
+    const activitiesError = document.getElementById("activities-error");
+    activitiesError.style.display = "block"
+    activitiesError.style.color = 'red';
+    activitiesError.innerHTML = "Select an activity!";
+  } else {
+    submit["act"] = true;
+    const activitiesError = document.getElementById("activities-error");
+    activitiesError.style.display = "none";
   }
-})
+
+  // If there are any errors in the submit object, don't submit form
+  for (var key in submit) {
+    if (submit[key] === false) {
+      event.preventDefault();
+    }
+  }
+});
